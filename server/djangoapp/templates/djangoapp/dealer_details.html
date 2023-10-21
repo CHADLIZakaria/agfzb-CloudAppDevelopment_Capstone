@@ -6,13 +6,37 @@
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
-
     <body>
 
     <!--Add a nav bar here -->
 
     <!-- Add reviews as cards -->
+    <h1>Reviews for </h1>
+
+    <div class="container">
+         <a href="add" class="btn btn-primary mb-2">Add review</a>
+         <div class="row">
+            {% for review in data %}
+            <div class="col-sm-4">
+                <div class="card mb-2">
+                    <div class="card-header d-flex align-items-center">
+                        {% if review.sentiment == 'positive' %}
+                        <img src="{{MEDIA_URL}}/emoji/positive.png" style="width: 30px; height: 30px"/>
+                         {% elif review.sentiment == 'negative' %}
+                        <img src="{{MEDIA_URL}}/emoji/negative.png" style="width: 30px; height: 30px"/>
+                         {% elif review.sentiment == 'neutral' %}
+                        <img src="{{MEDIA_URL}}/emoji/neutral.png" style="width: 30px; height: 30px"/>
+                        {% endif %}
+                        <div class="ml-2">
+                            <h5 class="card-title">{{review.car_make}}, {{review.car_model}} <br/>{{review.purchase_date}}</h5>
+                            <p class="card-text">{{review.review}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
     </body>
-
 </html>

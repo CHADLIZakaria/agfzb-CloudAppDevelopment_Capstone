@@ -10,6 +10,8 @@ from datetime import datetime
 import logging
 import json
 
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -56,16 +58,29 @@ def registration_request(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
-    context = {}
     if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+        url = "http://localhost:8080/delearships"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        # Concat all dealer's short name
+        # Return a list of dealer short name
+        return render(request, 'djangoapp/index.html', {"data": dealerships})
 
 
-# Create a `get_dealer_details` view to render the reviews of a dealer
-# def get_dealer_details(request, dealer_id):
-# ...
+def get_dealer_details(request, dealer_id):
+    if request.method == "GET":
+        url = "http://localhost:8080/dealer"
+        # Get dealers from the URL
+        dealershipReviews = get_dealer_reviews_from_cf(url, dealer_id)
+        return render(request, 'djangoapp/dealer_details.html', {"data": dealershipReviews})
 
-# Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+
+def add_review(request, dealer_id):
+    if request.method == "GET":
+        url = "http://localhost:8080/dealer"
+        data = get_dealer_reviews_from_cf(url, dealer_id)
+        return render(request, 'djangoapp/add_review.html', {"cars": data, "dealer_id": dealer_id})
+    elif request.method == "POST":
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+        #return render(request, 'djangoapp/add_review.html')
 
