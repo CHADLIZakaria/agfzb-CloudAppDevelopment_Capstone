@@ -10,7 +10,7 @@ from datetime import datetime
 import logging
 import json
 
-from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, get_dealer_with_id, post_request
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
-        url = "http://localhost:8080/delearships"
+        url = "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/dealership"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
         # Concat all dealer's short name
@@ -69,18 +69,40 @@ def get_dealerships(request):
 
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
-        url = "http://localhost:8080/dealer"
+        url = "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/get_reviews"
         # Get dealers from the URL
         dealershipReviews = get_dealer_reviews_from_cf(url, dealer_id)
-        return render(request, 'djangoapp/dealer_details.html', {"data": dealershipReviews})
+        dealer = get_dealer_with_id(
+            "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/dealership", dealer_id)
+        return render(request, 'djangoapp/dealer_details.html', {"data": dealershipReviews, "dealer": dealer})
 
 
 def add_review(request, dealer_id):
     if request.method == "GET":
-        url = "http://localhost:8080/dealer"
+        url = "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/get_reviews"
         data = get_dealer_reviews_from_cf(url, dealer_id)
         return render(request, 'djangoapp/add_review.html', {"cars": data, "dealer_id": dealer_id})
     elif request.method == "POST":
+        url = "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/get_reviews"
+        data = get_dealer_reviews_from_cf(url, dealer_id)
+        dealership = dealer_id
+        review = request.POST.get("review", "")
+        purchase = request.POST.get("purchase", "")
+        purchase_date = request.POST.get("purchase_date", "")
+        car = request.POST.get("car", "").split("-")
+        body = {
+            'id': len(data)+1,
+            'name': 'test',
+            'dealership': dealership,
+            'review': review,
+            'purchase': purchase,
+            'purchase_date': purchase_date.utcnow().isoformat(),
+            'car_make': car[0],
+            'car_model': car[1],
+            'car_year': car[2]
+        }
+        url_post = "https://prodlist.18x7z2eezce9.us-south.codeengine.appdomain.cloud/api/post_review"
+        post_request(url_post, body)
         return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
         #return render(request, 'djangoapp/add_review.html')
 

@@ -11,7 +11,7 @@
     <!--Add a nav bar here -->
 
     <!-- Add reviews as cards -->
-    <h1>Reviews for </h1>
+    <h1>Reviews for {{dealer.full_name}}</h1>
 
     <div class="container">
          <a href="add" class="btn btn-primary mb-2">Add review</a>
@@ -28,7 +28,7 @@
                         <img src="{{MEDIA_URL}}/emoji/neutral.png" style="width: 30px; height: 30px"/>
                         {% endif %}
                         <div class="ml-2">
-                            <h5 class="card-title">{{review.car_make}}, {{review.car_model}} <br/>{{review.purchase_date}}</h5>
+                            <h5 class="card-title">{{review.car_make}}, {{review.car_model}} <br/>{{review.car_year}}</h5>
                             <p class="card-text">{{review.review}}</p>
                         </div>
                     </div>

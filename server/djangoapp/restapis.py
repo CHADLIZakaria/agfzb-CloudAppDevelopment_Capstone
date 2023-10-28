@@ -55,20 +55,31 @@ def get_dealers_from_cf(url, **kwargs):
     # Call get_request with a URL parameter
     json_result = get_request(url)
     if json_result:
-        # Get the row list in JSON as dealers
-        dealers = json_result["rows"]
         # For each dealer object
-        for dealer in dealers:
-            # Get its content in `doc` object
-            dealer_doc = dealer["doc"]
+        for dealer in json_result:
             # Create a CarDealer object with values in `doc` object
-            dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                   full_name=dealer_doc["full_name"],
-                                   id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"],
-                                   short_name=dealer_doc["short_name"],
-                                   st=dealer_doc["st"], zip=dealer_doc["zip"])
+            dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"],
+                                   full_name=dealer["full_name"],
+                                   id=dealer["id"], lat=dealer["lat"], long=dealer["long"],
+                                   short_name=dealer["short_name"],
+                                   st=dealer["st"], zip=dealer["zip"])
             results.append(dealer_obj)
     return results
+
+
+def get_dealer_with_id(url, dealer_id, **kwargs):
+    # Call get_request with a URL parameter
+    json_result = get_request(url, id=dealer_id)
+    if json_result:
+        # For each dealer object
+        dealer = json_result[0]
+        # Create a CarDealer object with values in `doc` object
+        dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"],
+                               full_name=dealer["full_name"],
+                               id=dealer["id"], lat=dealer["lat"], long=dealer["long"],
+                               short_name=dealer["short_name"],
+                               st=dealer["st"], zip=dealer["zip"])
+        return dealer_obj
 
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
@@ -80,26 +91,23 @@ def get_dealer_reviews_from_cf(url, dealerId):
     # Call get_request with a URL parameter
     json_result = get_request(url, dealerId=dealerId)
     if json_result:
-        # Get the row list in JSON as dealers
-        dealers = json_result["rows"]
         # For each dealer object
-        for dealer in dealers:
+        for dealer in json_result:
             # Get its content in `doc` object
-            dealer_doc = dealer["doc"]
             # Create a CarDealer object with values in `doc` object
-            sentiment = analyze_review_sentiments(dealer_doc["review"])
-            if dealer_doc["purchase_date"] is not None:
-                cr_date = dealer_doc["purchase_date"]
+            if dealer["review"] is not None:
+                sentiment = analyze_review_sentiments(dealer["review"])
+            if dealer["purchase_date"] is not None:
+                cr_date = dealer["purchase_date"]
                 cr_date = datetime.datetime.strptime(cr_date, '%m/%d/%Y')
                 year = cr_date.strftime("%Y")
             else:
-                year = dealer_doc["purchase_date"]
-            print(year)
-            dealer_obj = DealerReview(dealership=dealer_doc["dealership"], name=dealer_doc["name"],
-                                      purchase=dealer_doc["purchase"], review=dealer_doc["review"],
-                                      purchase_date=year, car_make=dealer_doc["car_make"],
-                                      car_model=dealer_doc["car_model"], car_year=dealer_doc["car_year"],
-                                      sentiment=sentiment, id=dealer_doc["id"])
+                year = dealer["purchase_date"]
+            dealer_obj = DealerReview(dealership=dealer["dealership"], name=dealer["name"],
+                                      purchase=dealer["purchase"], review=dealer["review"],
+                                      purchase_date=year, car_make=dealer["car_make"],
+                                      car_model=dealer["car_model"], car_year=dealer["car_year"],
+                                      sentiment=sentiment, id=dealer["id"])
             results.append(dealer_obj)
     return results
 
